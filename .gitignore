@@ -1,0 +1,9 @@
+.DS_Store
+.pem
+.env
+.env.staging
+.env.prod
+node_modules
+private-key.pem
+newrelic_agent.log
+

@@ -1,0 +1,25 @@
+dispatch:
+
+  # Deploy this file to update routings for this service
+  # $ gcloud config set project open-rights-exchange 
+  # $ gcloud app deploy dispatch.yaml  
+
+  # Default service serves the typical web resources and all static resources.
+  # - url: "*/favicon.ico"
+  #   service: web
+
+  # Default service serves simple hostname request.
+  # - url: "openrights.exchange/*"
+  #   service: default
+  # If we later add a website at www. ...
+  # - url: "www.openrights.exchange/*"
+  #   service: web
+
+  - url: "verifier-staging.openrights.exchange/*"
+    service: verifier-staging
+
+  - url: "verifier.openrights.exchange/*"
+    service: verifier
+
+  - url: "explorer.openrights.exchange/*"
+    service: explorer
