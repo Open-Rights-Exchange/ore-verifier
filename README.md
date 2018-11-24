@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/Open-Rights-Exchange/ore-verifier.svg?style=svg)](https://circleci.com/gh/Open-Rights-Exchange/ore-verifier)
+
 ## About
 
 The ORE Verifier is an off-chain oracle that verifies transactions for the Open Rights Exchange protocol
