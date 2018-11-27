@@ -1,21 +1,28 @@
-const Eos = require('eosjs')
+require('dotenv').config()
 const BigNumber = require("bignumber.js")
+const fetch = require('node-fetch')
+const {
+  TextDecoder,
+  TextEncoder
+} = require('text-encoding');
+const eosjs = require('eosjs');
 
 const verifierKey = process.env.VERIFIER_PRIVATE_KEY
 const oreNetworkUri = process.env.ORE_NETWORK_URI
-const eosTimeout = process.EOS_TRANSACTION_EXPIRE_SECONDS
 
-config = {
+const rpc = new eosjs.JsonRpc(oreNetworkUri, {
+  fetch
+});
+
+const signatureProvider = new eosjs.JsSignatureProvider([verifierKey]);
+
+const eos = new eosjs.Api({
   chainId: process.env.ORE_NETWORK_CHAINID,
-  keyProvider: [verifierKey],
-  httpEndpoint: oreNetworkUri,
-  expireInSeconds: eosTimeout,
-  broadcast: true,
-  verbose: false,
-  sign: true
-}
-
-const eos = Eos(config)
+  rpc,
+  signatureProvider,
+  textEncoder: new TextEncoder(),
+  textDecoder: new TextDecoder()
+});
 
 async function find(contractName, scope, tableName, lowerBound, upperBound, limit = 1, json = true) {
   const records = await eos.getTableRows({
@@ -30,15 +37,28 @@ async function find(contractName, scope, tableName, lowerBound, upperBound, limi
   return records.rows
 }
 
-// Transform account names from base32 to their numeric representations
-function tableKey(account) {
-  return new BigNumber(Eos.modules.format.encodeName(account, false))
+async function getAllTableRows(params, key_field = 'id', json = true) {
+  let results = [];
+  const lowerBound = 0;
+  const limit = -1;
+  const parameters = {
+    ...params,
+    json,
+    lower_bound: params.lower_bound || lowerBound,
+    scope: params.scope || params.code,
+    limit: params.limit || limit,
+  };
+  results = await eos.rpc.get_table_rows(parameters);
+  return results.rows;
 }
 
-// Finds a row in the table within the scope and matching parameters
-async function findOne(contractName, scope, tableName, tableKey, json = true) {
-  const rows = await find(contractName, scope, tableName, tableKey, tableKey.plus(1), 1, json)
-  return rows[0]
+function transact(actions, blocksBehind = 3, expireSeconds = 30) {
+  return eos.transact({
+    actions
+  }, {
+    blocksBehind,
+    expireSeconds,
+  });
 }
 
 async function getContractInstance(contractName, accountName) {
@@ -51,10 +71,10 @@ async function getContractInstance(contractName, accountName) {
     options,
   }
 }
-const eosVerifier = tableKey("verifier.ore")
+
 module.exports = {
-  findOne,
-  getContractInstance,
-  tableKey,
-  eos
+  eos,
+  getAllTableRows,
+  transact,
+  rpc,
 }

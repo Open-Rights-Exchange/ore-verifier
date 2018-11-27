@@ -2,10 +2,11 @@ require('dotenv').config()
 const ecc = require('eosjs-ecc')
 const jwt = require('jsonwebtoken')
 const sortJson = require('sort-json')
-const eosJs = require("./eos.js")
 const uuidv1 = require('uuid/v1')
-const eos = eosJs.eos
-const getContractInstance = eosJs.getContractInstance
+const {
+  eos,
+  transact
+} = require("./eos.js")
 const {
   getInstrument,
   getRightFromInstrument,
@@ -31,7 +32,7 @@ let errorHead = 'Error from verifier'
 //check if the public key belongs to the account provided
 async function checkPubKeytoAccount(account, publicKey) {
 
-  const keyaccounts = await eos.getKeyAccounts(publicKey)
+  const keyaccounts = await eos.rpc.history_get_key_accounts(publicKey)
   const accounts = await keyaccounts["account_names"]
 
   return accounts.includes(account);
@@ -54,19 +55,65 @@ async function verify(signature, instrumentId, owner) {
 
 // update the usage log on the ore blockchain 
 async function updateUsageLog(verifier, logContractName, voucherId, rightName, accessToken, amount = 0, updateLogs = true) {
-  let {
-    contract: logContract,
-    options: logOptions
-  } = await getContractInstance(logContractName, verifier)
+  let actions = []
+  let errMsg
 
   const timestamp = Date.now()
   const accessTokenHash = ecc.sha256(accessToken)
 
   if (updateLogs === true) {
-    const logUpdateReciept = await logContract.createlog(voucherId, rightName, accessTokenHash, timestamp, logOptions)
+    actions = [{
+      account: logContractName,
+      name: 'createlog',
+      authorization: [{
+        actor: verifier,
+        permission: 'active',
+      }],
+      data: {
+        instrument_id: voucherId,
+        right_name: rightName,
+        token_hash: accessTokenHash,
+        timestamp
+      }
+    }]
+
+    try {
+      (async () => {
+        const logUpdateReciept = await transact(actions)
+      })()
+    } catch (e) {
+      errMsg = "Error while updating the logs for" + rightName + "right of instrument id" + voucherId + "on the ORE blockchain."
+      if (e instanceof RpcError) {
+        throw new Error(errMsg + JSON.stringify(e.json, null, 2));
+      }
+      throw new Error(errMsg)
+    }
   }
 
-  const usageCountUpdateReciept = await logContract.updatecount(voucherId, rightName, amount, logOptions)
+  actions = [{
+    account: logContractName,
+    name: 'updatecount',
+    authorization: [{
+      actor: verifier,
+      permission: 'active',
+    }],
+    data: {
+      instrument_id: voucherId,
+      right_name: rightName,
+      cpu: amount,
+    }
+  }]
+
+  try {
+    (async () => {
+      const usageCountUpdateReciept = await transact(actions)
+    })()
+  } catch (error) {
+    errMsg =
+      throw new Error(errMsg)
+  }
+
+
   log("transaction id for Api call count updates for voucher " + voucherId + " of " + owner + " ", usageCountUpdateReciept.transaction_id)
 }
 
@@ -95,6 +142,7 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
     // check if the verifier is authorized
     try {
       const isAuth = await checkVerifier(verifier, privateKey)
+
       if (!isAuth) {
         errMsg = "Not an authorized verifier. Make sure the VERIFIER_PRIVATE_KEY belongs to VERIFIER_ACCOUNT_NAME in the env."
         throw new Error(errMsg)
@@ -216,18 +264,28 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
 
           const amount = await getTokenAmount(amountPerCall, cpuTokenSymbol)
 
-          let {
-            contract,
-            options
-          } = await getContractInstance(cpuContractName, verifier)
-
           if (amount != "0.0000 CPU") {
             const memo = amount + " transfer from " + owner + " to " + issuer + uuidv1();
-            const cpuTransactionReciept = await contract.transferfrom(verifier, owner, issuer, amount, memo, options)
+
+            const actions = [{
+              account: cpuContractName,
+              name: 'transferfrom',
+              authorization: [{
+                actor: verifier,
+                permission: 'active',
+              }],
+              data: {
+                sender: verifier,
+                from: owner,
+                to: issuer,
+                quantity: amount,
+                memo
+              }
+            }]
+
+            const cpuTransactionReciept = await transact(actions)
             log("transaction id for cpu transfer from " + owner + " to " + issuer + " ", cpuTransactionReciept.transaction_id)
-
           }
-
           updateUsageLog(verifier, logContractName, voucherId, rightName, JSON.stringify(jwtToken), amount)
         } else {
           errMsg = "The user account doesnt have enough balance for the api call."

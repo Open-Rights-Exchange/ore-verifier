@@ -4,18 +4,12 @@ const express = require('express')
 const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
+const cors = require('cors');
+const _ = require('lodash')
+const verifierHandle = require('./src/verifier')
 const {
   URL
 } = require('url')
-const fetch = require('node-fetch')
-const _ = require('lodash')
-const verifierHandle = require('./src/verifier')
-const fs = require('fs')
-const cors = require('cors');
-
-const getPath = (endpoint) => {
-  return new URL(endpoint).pathname
-}
 
 const buildServer = ({}) => {
   const verifyHandler = verifierHandle.verifyHandler(verifier, privateKey, verifierPrivateKey, instrumentContractName, rightContractName, cpuContractName, cpuTokenSymbol, logContractName)
@@ -103,6 +97,7 @@ const run = async () => {
     cpuTokenSymbol,
     logContractName
   })
+
   server.listen(port, () => console.log(`listening on ${port}...`))
 }
 
