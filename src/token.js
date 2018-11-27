@@ -2,9 +2,8 @@
 Includes functions get token balance and approved token amount to be spent by the verifier
 */
 const {
-    getAllTableRows,
-    eos
-} = require("./eos.js")
+    orejs
+} = require("./ore.js")
 
 // get balance of an account for a given token symbol
 function getTokenAmount(tokenAmount, tokenSymbol) {
@@ -29,7 +28,7 @@ function getTokenAmount(tokenAmount, tokenSymbol) {
 // get the amount approved for the verifier by the owner
 async function getApprovalAmount(verifier, owner, cpuContractName, cpuTokenSymbol) {
     let approvedAmount = 0
-    const allowance = await getAllTableRows({
+    const allowance = await orejs.getAllTableRows({
         code: cpuContractName,
         scope: owner,
         table: 'allowances',
@@ -43,13 +42,9 @@ async function getApprovalAmount(verifier, owner, cpuContractName, cpuTokenSymbo
     return parseFloat(approvedAmount)
 }
 
-async function getBalance(accountName, cpuContractName, cpuTokenSymbol) {
-
-    const balance = await eos.rpc.get_currency_balance(cpuContractName, accountName, cpuTokenSymbol)
-    if (balance) {
-        return balance[0].split(cpuTokenSymbol)[0]
-    }
-    return 0
+async function getBalance(accountName, tokenSymbol, contractName) {
+    const balance = await orejs.getBalance(accountName, tokenSymbol, contractName)
+    return balance
 }
 
 module.exports = {

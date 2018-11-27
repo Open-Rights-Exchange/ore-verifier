@@ -4,9 +4,8 @@ const jwt = require('jsonwebtoken')
 const sortJson = require('sort-json')
 const uuidv1 = require('uuid/v1')
 const {
-  eos,
-  transact
-} = require("./eos.js")
+  orejs
+} = require("./ore.js")
 const {
   getInstrument,
   getRightFromInstrument,
@@ -29,34 +28,25 @@ const {
 let errMsg = ''
 let errorHead = 'Error from verifier'
 
-//check if the public key belongs to the account provided
-async function checkPubKeytoAccount(account, publicKey) {
-
-  const keyaccounts = await eos.rpc.history_get_key_accounts(publicKey)
-  const accounts = await keyaccounts["account_names"]
-
-  return accounts.includes(account)
-}
-
 // check if the private key of the verifier service belongs to the actual trusted verifier account
 async function checkVerifier(verifier, privateKey) {
 
   const publicKey = await ecc.privateToPublic(privateKey)
-  const result = await checkPubKeytoAccount(verifier, publicKey)
+  const result = await orejs.checkPubKeytoAccount(verifier, publicKey)
   return result
 }
 
+// verify the signature of the client request 
 async function verify(signature, instrumentId, owner) {
 
   const publicKey = ecc.recover(signature, instrumentId.toString())
-  const result = await checkPubKeytoAccount(owner, publicKey)
+  const result = await orejs.checkPubKeytoAccount(owner, publicKey)
   return result
 }
 
 // update the usage log on the ore blockchain 
 async function updateUsageLog(verifier, logContractName, voucherId, rightName, accessToken, amount = 0, updateLogs = true) {
   let actions = []
-  let errMsg
 
   const timestamp = Date.now()
   const accessTokenHash = ecc.sha256(accessToken)
@@ -79,7 +69,7 @@ async function updateUsageLog(verifier, logContractName, voucherId, rightName, a
 
     try {
       (async () => {
-        const logUpdateReciept = await transact(actions)
+        const logUpdateReciept = await orejs.transact(actions)
       })()
     } catch (error) {
       errMsg = "Error while updating the logs for" + rightName + "right of instrument id" + voucherId + "on the ORE blockchain."
@@ -106,7 +96,7 @@ async function updateUsageLog(verifier, logContractName, voucherId, rightName, a
 
   try {
     (async () => {
-      const usageCountUpdateReciept = await transact(actions)
+      const usageCountUpdateReciept = await orejs.transact(actions)
     })()
   } catch (error) {
     errMsg = "Error while updating the usage count for" + rightName + "right of instrument id" + voucherId + "on the ORE blockchain."
@@ -233,7 +223,7 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
 
       currentTime = Math.floor(Date.now() / 1000)
 
-      ownerBalance = await getBalance(owner, cpuContractName, cpuTokenSymbol)
+      ownerBalance = await getBalance(owner, cpuTokenSymbol, cpuContractName)
       approvalAmount = await getApprovalAmount(verifier, owner, cpuContractName, cpuTokenSymbol)
     } catch (error) {
       return res.status(401).json({
@@ -284,7 +274,7 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
                 memo
               }
             }]
-            const cpuTransactionReciept = await transact(actions)
+            const cpuTransactionReciept = await orejs.transact(actions)
             log("transaction id for cpu transfer from " + owner + " to " + issuer + " ", cpuTransactionReciept.transaction_id)
           }
           updateUsageLog(verifier, logContractName, voucherId, rightName, JSON.stringify(jwtToken), amount)
@@ -309,7 +299,7 @@ const usageHandler = (verifier, privateKey, logContractName) => {
   //handler for updating the usage logs on the ORE blockchain
   // NOTE: this handler only updates the total call count against an instrument for a particular right
   // NOTE: it doesn't log usage in the logs table for the free API calls
-  let errMsg
+
   return async (req, res, next) => {
     try {
       const isAuth = await checkVerifier(verifier, privateKey)
@@ -349,7 +339,6 @@ const usageHandler = (verifier, privateKey, logContractName) => {
 }
 
 module.exports = {
-  checkPubKeytoAccount,
   checkVerifier,
   verify,
   verifyHandler,
