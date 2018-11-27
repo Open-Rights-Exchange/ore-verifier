@@ -1,8 +1,12 @@
 /*
 Includes functions to get data from the right registry 
 */
-const eosJs = require("./eos.js")
-const eos = eosJs.eos
+// const eosJs = require("./eos.js")
+// const eos = eosJs.eos
+const {
+    getAllTableRows,
+    eos
+} = require("./eos.js")
 const {
     encrypt
 } = require("./helpers.js")
@@ -10,18 +14,16 @@ const {
 //get the right details from right table
 async function getRight(rightName, rightContractName) {
     let right = null
-    const rights = await eos.getTableRows({
+    const rights = await getAllTableRows({
         code: rightContractName,
-        json: true,
         scope: rightContractName,
         table: 'rights',
         limit: -1
     })
 
-    for (var i = 0; i < rights.rows.length; i++) {
-        if (rights.rows[i]["right_name"] === rightName) {
-            right = await rights.rows[i]
-            return right
+    for (var i = 0; i < rights.length; i++) {
+        if (rights[i]["right_name"] === rightName) {
+            return rights[i]
         }
     }
     return right
