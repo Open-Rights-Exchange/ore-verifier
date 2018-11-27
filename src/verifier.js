@@ -35,7 +35,7 @@ async function checkPubKeytoAccount(account, publicKey) {
   const keyaccounts = await eos.rpc.history_get_key_accounts(publicKey)
   const accounts = await keyaccounts["account_names"]
 
-  return accounts.includes(account);
+  return accounts.includes(account)
 }
 
 // check if the private key of the verifier service belongs to the actual trusted verifier account
@@ -81,10 +81,10 @@ async function updateUsageLog(verifier, logContractName, voucherId, rightName, a
       (async () => {
         const logUpdateReciept = await transact(actions)
       })()
-    } catch (e) {
+    } catch (error) {
       errMsg = "Error while updating the logs for" + rightName + "right of instrument id" + voucherId + "on the ORE blockchain."
-      if (e instanceof RpcError) {
-        throw new Error(errMsg + JSON.stringify(e.json, null, 2));
+      if (error instanceof RpcError) {
+        throw new Error(errMsg + JSON.stringify(error.json, null, 2))
       }
       throw new Error(errMsg)
     }
@@ -109,8 +109,11 @@ async function updateUsageLog(verifier, logContractName, voucherId, rightName, a
       const usageCountUpdateReciept = await transact(actions)
     })()
   } catch (error) {
-    errMsg =
-      throw new Error(errMsg)
+    errMsg = "Error while updating the usage count for" + rightName + "right of instrument id" + voucherId + "on the ORE blockchain."
+    if (error instanceof RpcError) {
+      throw new Error(errMsg + JSON.stringify(error.json, null, 2))
+    }
+    throw new Error(errMsg)
   }
 
 
@@ -265,8 +268,7 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
           const amount = await getTokenAmount(amountPerCall, cpuTokenSymbol)
 
           if (amount != "0.0000 CPU") {
-            const memo = amount + " transfer from " + owner + " to " + issuer + uuidv1();
-
+            const memo = amount + " transfer from " + owner + " to " + issuer + uuidv1()
             const actions = [{
               account: cpuContractName,
               name: 'transferfrom',
@@ -282,7 +284,6 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
                 memo
               }
             }]
-
             const cpuTransactionReciept = await transact(actions)
             log("transaction id for cpu transfer from " + owner + " to " + issuer + " ", cpuTransactionReciept.transaction_id)
           }

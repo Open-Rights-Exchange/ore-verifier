@@ -22,19 +22,6 @@ const eos = new eosjs.Api({
   textDecoder: new TextDecoder()
 });
 
-async function find(contractName, scope, tableName, lowerBound, upperBound, limit = 1, json = true) {
-  const records = await eos.getTableRows({
-    code: contractName.toString(),
-    json: json,
-    limit: limit,
-    lower_bound: lowerBound.toString(),
-    scope: scope.toString(),
-    table: tableName.toString(),
-    upper_bound: upperBound.toString()
-  })
-  return records.rows
-}
-
 async function getAllTableRows(params, key_field = 'id', json = true) {
   let results = [];
   const lowerBound = 0;
@@ -59,20 +46,8 @@ function transact(actions, blocksBehind = 3, expireSeconds = 30) {
   });
 }
 
-async function getContractInstance(contractName, accountName) {
-  const options = {
-    authorization: `${accountName}@active`,
-  };
-  const contract = await eos.contract(contractName, options);
-  return {
-    contract,
-    options,
-  }
-}
-
 module.exports = {
   eos,
   getAllTableRows,
-  transact,
-  rpc,
+  transact
 }
