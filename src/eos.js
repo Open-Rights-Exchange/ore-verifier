@@ -1,5 +1,3 @@
-require('dotenv').config()
-const BigNumber = require("bignumber.js")
 const fetch = require('node-fetch')
 const {
   TextDecoder,
