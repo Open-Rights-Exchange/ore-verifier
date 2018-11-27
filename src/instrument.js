@@ -1,19 +1,16 @@
 /*
 includes all instrument related functions
 */
-// const eosJs = require("./eos.js")
-// const eos = eosJs.eos
 const {
-    getAllTableRows,
-    eos
-} = require("./eos.js")
+    orejs
+} = require("./ore.js")
 const {
     encrypt
 } = require("./helpers.js")
 
 async function getInstrument(instrumentId, instrumentContractName) {
     let instrument = null
-    const instruments = await getAllTableRows({
+    const instruments = await orejs.getAllTableRows({
         code: instrumentContractName,
         scope: instrumentContractName,
         table: 'tokens',
