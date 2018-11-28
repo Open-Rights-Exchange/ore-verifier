@@ -35,7 +35,7 @@ async function getApprovalAmount(verifier, owner, cpuContractName, cpuTokenSymbo
         lower_bound: verifier,
     })
 
-    if (allowance != undefined) {
+    if (allowance != undefined && allowance.length != 0) {
         approvedAmount = allowance[0]["quantity"].split(cpuTokenSymbol)[0]
     }
 
