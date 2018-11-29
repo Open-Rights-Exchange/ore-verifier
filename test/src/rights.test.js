@@ -1,9 +1,6 @@
 /* global fetch:true */
 /* global RIGHTS_REGISTRY_CONTRACT_NAME:true */
-/* global ORE_NETWORK_URI:true */
-/* global ORE_NETWORK_CHAINID:true */
-/* global VERIFIER_PRIVATE_KEY:true */
-/* global VERIFIER_ACCOUNT_NAME:true */
+
 const {
     getRight,
     resolveEndpoint,
@@ -16,10 +13,8 @@ const {
 
 const {
     mockRight,
-    mockEndpoint,
     mockAdditionalParams,
     mockEndpointObject,
-    expectFetch
 } = require('../helpers/fetch')
 
 const {
@@ -31,7 +26,7 @@ describe('getRight', () => {
 
     beforeEach(async () => {
         fetch.resetMocks();
-        mockGetTableRows(orejs);
+        mockGetTableRows(orejs, "rights");
     })
 
     it('returns the right details from the rights table in rights.ore', async () => {
@@ -42,7 +37,7 @@ describe('getRight', () => {
 
     it('returns null if the right does not exist', async () => {
         const right = await getRight("apimarket.manager.nonExistingRight", RIGHTS_REGISTRY_CONTRACT_NAME);
-        expect(right).toEqual(null);
+        expect(right).toBeNull;
     })
 })
 
@@ -51,7 +46,7 @@ describe('getEndpoint', () => {
 
     beforeEach(async () => {
         fetch.resetMocks();
-        mockGetTableRows(orejs);
+        mockGetTableRows(orejs, "rights");
         mockedEndpoint = await mockEndpointObject();
     })
     it('returns the endpoint for the passed in additional_url_params', async () => {
