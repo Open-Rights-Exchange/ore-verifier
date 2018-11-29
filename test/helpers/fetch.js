@@ -1,3 +1,5 @@
+/* global ORE_TESTA_ACCOUNT_NAME: true */
+
 function expectFetch(...urls) {
   expect(fetch.mock.calls.length).toEqual(urls.length);
   urls.forEach((url, i) => {
@@ -12,420 +14,6 @@ function mock(body, status = 200) {
       status,
     },
   ];
-}
-
-function mockAbi() {
-  return `{
-      "version": "eosio::abi/1.0",
-      "types": [],
-      "structs": [{
-          "name": "args",
-          "base": "",
-          "fields": [{
-              "name": "name",
-              "type": "string"
-            },{
-              "name": "value",
-              "type": "string"
-            }
-          ]
-        },{
-          "name": "endpoint_url",
-          "base": "",
-          "fields": [{
-              "name": "base_right",
-              "type": "string"
-            },{
-              "name": "url",
-              "type": "string"
-            },{
-              "name": "method",
-              "type": "string"
-            },{
-              "name": "matches_params",
-              "type": "args[]"
-            },{
-              "name": "token_life_span",
-              "type": "uint64"
-            },{
-              "name": "is_default",
-              "type": "bool"
-            }
-          ]
-        },{
-          "name": "right_reg",
-          "base": "",
-          "fields": [{
-              "name": "id",
-              "type": "uint64"
-            },{
-              "name": "right_name",
-              "type": "string"
-            },{
-              "name": "owner",
-              "type": "name"
-            },{
-              "name": "urls",
-              "type": "endpoint_url[]"
-            },{
-              "name": "issuer_whitelist",
-              "type": "name[]"
-            }
-          ]
-        },{
-          "name": "param_type",
-          "base": "",
-          "fields": [{
-              "name": "type",
-              "type": "string"
-            },{
-              "name": "values",
-              "type": "args[]"
-            }
-          ]
-        },{
-          "name": "params",
-          "base": "",
-          "fields": [{
-              "name": "params",
-              "type": "args[]"
-            }
-          ]
-        },{
-          "name": "right",
-          "base": "",
-          "fields": [{
-              "name": "right_name",
-              "type": "string"
-            },{
-              "name": "description",
-              "type": "string"
-            },{
-              "name": "price_in_cpu",
-              "type": "string"
-            },{
-              "name": "additional_url_params",
-              "type": "params[]"
-            }
-          ]
-        },{
-          "name": "instrument_data",
-          "base": "",
-          "fields": [{
-              "name": "issuer",
-              "type": "name"
-            },{
-              "name": "instrument_class",
-              "type": "string"
-            },{
-              "name": "description",
-              "type": "string"
-            },{
-              "name": "instrument_template",
-              "type": "string"
-            },{
-              "name": "security_type",
-              "type": "string"
-            },{
-              "name": "parameter_rules",
-              "type": "param_type[]"
-            },{
-              "name": "rights",
-              "type": "right[]"
-            },{
-              "name": "parent_instrument_id",
-              "type": "uint64"
-            },{
-              "name": "data",
-              "type": "args[]"
-            },{
-              "name": "mutability",
-              "type": "uint8"
-            }
-          ]
-        },{
-          "name": "token",
-          "base": "",
-          "fields": [{
-              "name": "id",
-              "type": "uint64"
-            },{
-              "name": "owner",
-              "type": "name"
-            },{
-              "name": "minted_by",
-              "type": "name"
-            },{
-              "name": "minted_at",
-              "type": "uint64"
-            },{
-              "name": "instrument",
-              "type": "instrument_data"
-            },{
-              "name": "revoked",
-              "type": "bool"
-            },{
-              "name": "start_time",
-              "type": "uint64"
-            },{
-              "name": "end_time",
-              "type": "uint64"
-            },{
-              "name": "template_hash",
-              "type": "uint64"
-            },{
-              "name": "class_hash",
-              "type": "uint64"
-            }
-          ]
-        },{
-          "name": "accountdata",
-          "base": "",
-          "fields": [{
-              "name": "owner",
-              "type": "name"
-            },{
-              "name": "balance",
-              "type": "uint64"
-            },{
-              "name": "instruments",
-              "type": "uint64[]"
-            }
-          ]
-        },{
-          "name": "account",
-          "base": "",
-          "fields": [{
-              "name": "balance",
-              "type": "asset"
-            }
-          ]
-        },{
-          "name": "currencystat",
-          "base": "",
-          "fields": [{
-              "name": "supply",
-              "type": "asset"
-            },{
-              "name": "max_supply",
-              "type": "asset"
-            },{
-              "name": "issuer",
-              "type": "name"
-            }
-          ]
-        },{
-          "name": "right_param",
-          "base": "",
-          "fields": [{
-              "name": "right_name",
-              "type": "string"
-            },{
-              "name": "urls",
-              "type": "endpoint_url[]"
-            },{
-              "name": "whitelist",
-              "type": "name[]"
-            }
-          ]
-        },{
-          "name": "offer_data",
-          "base": "",
-          "fields": [{
-              "name": "id",
-              "type": "uint64"
-            },{
-              "name": "name",
-              "type": "string"
-            },{
-              "name": "rights",
-              "type": "right_param[]"
-            }
-          ]
-        },{
-          "name": "offer_params",
-          "base": "",
-          "fields": [{
-              "name": "right_name",
-              "type": "string"
-            },{
-              "name": "right_description",
-              "type": "string"
-            },{
-              "name": "right_price_in_cpu",
-              "type": "string"
-            },{
-              "name": "api_name",
-              "type": "string"
-            },{
-              "name": "api_description",
-              "type": "string"
-            },{
-              "name": "api_price_in_cpu",
-              "type": "string"
-            },{
-              "name": "api_payment_model",
-              "type": "string"
-            },{
-              "name": "api_additional_url_params",
-              "type": "string"
-            }
-          ]
-        },{
-          "name": "publishapi",
-          "base": "",
-          "fields": [{
-              "name": "creator",
-              "type": "name"
-            },{
-              "name": "issuer",
-              "type": "name"
-            },{
-              "name": "api_voucher_license_price_in_cpu",
-              "type": "string"
-            },{
-              "name": "api_voucher_lifetime_in_seconds",
-              "type": "string"
-            },{
-              "name": "api_voucher_start_date",
-              "type": "string"
-            },{
-              "name": "api_voucher_end_date",
-              "type": "string"
-            },{
-              "name": "api_voucher_valid_forever",
-              "type": "uint8"
-            },{
-              "name": "api_voucher_mutability",
-              "type": "uint8"
-            },{
-              "name": "api_voucher_security_type",
-              "type": "string"
-            },{
-              "name": "right_params",
-              "type": "offer_params[]"
-            },{
-              "name": "api_voucher_parameter_rules",
-              "type": "param_type[]"
-            },{
-              "name": "offer_mutability",
-              "type": "uint8"
-            },{
-              "name": "offer_security_type",
-              "type": "string"
-            },{
-              "name": "offer_template",
-              "type": "string"
-            },{
-              "name": "offer_start_time",
-              "type": "uint64"
-            },{
-              "name": "offer_end_time",
-              "type": "uint64"
-            },{
-              "name": "offer_override_id",
-              "type": "uint64"
-            }
-          ]
-        },{
-          "name": "licenseapi",
-          "base": "",
-          "fields": [{
-              "name": "creator",
-              "type": "name"
-            },{
-              "name": "buyer",
-              "type": "name"
-            },{
-              "name": "offer_id",
-              "type": "uint64"
-            },{
-              "name": "offer_template",
-              "type": "string"
-            },{
-              "name": "override_voucher_id",
-              "type": "uint64"
-            }
-          ]
-        }
-      ],
-      "actions": [{
-          "name": "publishapi",
-          "type": "publishapi",
-          "ricardian_contract": ""
-        },{
-          "name": "licenseapi",
-          "type": "licenseapi",
-          "ricardian_contract": ""
-        }
-      ],
-      "tables": [{
-          "name": "rights",
-          "index_type": "i64",
-          "key_names": [
-            "id"
-          ],
-          "key_types": [
-            "uint64"
-          ],
-          "type": "right_reg"
-        },{
-          "name": "tokens",
-          "index_type": "i64",
-          "key_names": [
-            "id"
-          ],
-          "key_types": [
-            "uint64"
-          ],
-          "type": "token"
-        },{
-          "name": "account",
-          "index_type": "i64",
-          "key_names": [
-            "owner"
-          ],
-          "key_types": [
-            "name"
-          ],
-          "type": "accountdata"
-        },{
-          "name": "accounts",
-          "index_type": "i64",
-          "key_names": [
-            "balance"
-          ],
-          "key_types": [
-            "asset"
-          ],
-          "type": "account"
-        },{
-          "name": "stat",
-          "index_type": "i64",
-          "key_names": [
-            "supply"
-          ],
-          "key_types": [
-            "asset"
-          ],
-          "type": "currencystat"
-        },{
-          "name": "offersdata",
-          "index_type": "i64",
-          "key_names": [
-            "id"
-          ],
-          "key_types": [
-            "uint64"
-          ],
-          "type": "offer_data"
-        }
-      ],
-      "ricardian_clauses": [],
-      "error_messages": [],
-      "abi_extensions": [],
-      "variants": []
-    }`;
 }
 
 function mockAccount(account = {}) {
@@ -529,24 +117,6 @@ function mockError(error = {}) {
   });
 }
 
-function mockInfo(info = {}) {
-  return mock([{
-    server_version: '75635168',
-    chain_id: 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f',
-    head_block_num: 591911,
-    last_irreversible_block_num: 591910,
-    last_irreversible_block_id: '00090826ea7ed488caa5bf6b1e3ce25b5bd34f388249cc6893b473bc01c3416f',
-    head_block_id: '00090827d92a0b18d95562ddb45bc213a09a2ab0d1a408e7d00e62e0cc70e69c',
-    head_block_time: '2018-07-30T14:20:26.000',
-    head_block_producer: 'eosio',
-    virtual_block_cpu_limit: 200000000,
-    virtual_block_net_limit: 1048576000,
-    block_cpu_limit: 199900,
-    block_net_limit: 1048576,
-    ...info,
-  }]);
-}
-
 function mockInstrument(instrument = {}) {
   const innerInstrument = {
     issuer: 'aikon.apim',
@@ -554,6 +124,25 @@ function mockInstrument(instrument = {}) {
     description: 'process an image and returns the list of objects found',
     instrument_template: '',
     security_type: 'pass',
+    parameter_rules: [{
+      "type": "required",
+      "values": [{
+        "name": "appId",
+        "value": ""
+      }]
+    }, {
+      "type": "locked",
+      "values": [{
+        "name": "userAccount",
+        "value": ""
+      }]
+    }, {
+      "type": "default",
+      "values": [{
+        "name": "language",
+        "value": "en-us"
+      }]
+    }],
     rights: [{
       right_name: 'apimarket.manager.licenseApi',
       description: 'creates an api voucher to access cloud.hadron.contest-2018-07',
@@ -562,6 +151,7 @@ function mockInstrument(instrument = {}) {
     }],
     parent_instrument_id: 1,
     data: [],
+    encryptedBy: "",
     mutability: 1,
     ...instrument.instrument,
   };
@@ -697,20 +287,35 @@ function mockEndpointObject() {
   });
 }
 
+function mockApprovedAccounts(quantity = "0.0000 CPU") {
+  return mock({
+    "to": "verifier.ore",
+    "quantity": quantity
+  });
+}
+
+function mockAccountFromKey(account = ORE_TESTA_ACCOUNT_NAME) {
+  return mock({
+    "account_names": [
+      account
+    ]
+  })
+}
 
 module.exports = {
+  expectFetch,
+  mock,
+  mockAccountFromKey,
   mockRight,
   mockAdditionalParams,
   mockEndpointObject,
-  expectFetch,
-  mock,
-  mockAbi,
+  mockApprovedAccounts,
   mockAccount,
   mockBlock,
   mockCode,
   mockError,
-  mockInfo,
   mockInstrument,
   mockInstruments,
   mockTransaction,
+
 };

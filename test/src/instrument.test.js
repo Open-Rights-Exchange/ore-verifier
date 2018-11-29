@@ -1,6 +1,22 @@
 /* global ORE_OWNER_ACCOUNT_NAME:true */
 /* global ORE_TESTA_ACCOUNT_NAME:true */
 /* global ORE_NETWORK_URI:true */
+/* global INSTRUMENT_CONTRACT_NAME:true */
+
+
+const {
+    orejs
+} = require('../../src/ore')
+
+const {
+    getInstrument,
+    getRightFromInstrument,
+    getParamRulesFromInstrument
+} = require('../../src/instrument')
+
+const {
+    mockGetTableRows
+} = require('../helpers/ore')
 
 const {
     expectFetch,
@@ -9,130 +25,51 @@ const {
     mockInstruments,
 } = require('../helpers/fetch');
 
-describe('instrument', () => {
+describe('getInstrument', () => {
+    beforeEach(async () => {
+        fetch.resetMocks();
+        mockGetTableRows(orejs, "tokens");
+    })
+    it('returns the instrument with the instrument id passed in', async () => {
+        const instrument = await getInstrument(1, INSTRUMENT_CONTRACT_NAME)
+        expect(instrument.id).toEqual(1)
+    })
+    it('returns null if instrument not found', async () => {
+        const instrument = await getInstrument(100, INSTRUMENT_CONTRACT_NAME)
+        expect(instrument).toBeNull
+    })
+})
 
-    beforeAll(() => {});
+describe('getRightFromInstrument', () => {
+    beforeEach(async () => {
+        fetch.resetMocks();
+        mockGetTableRows(orejs, "tokens");
+    })
+    it('returns the right object with the required right name', async () => {
+        const instrument = await getInstrument(1, INSTRUMENT_CONTRACT_NAME)
+        const right = await getRightFromInstrument(instrument, 'apimarket.manager.licenseApi')
+        expect(right.right_name).toEqual('apimarket.manager.licenseApi')
+    })
+    it('returns null if the right is not found in the instrument', async () => {
+        const instrument = await getInstrument(1, INSTRUMENT_CONTRACT_NAME)
+        const right = await getRightFromInstrument(instrument, 'non existing right')
+        expect(right).toBeNull
+    })
+})
 
-    describe('findInstruments', () => {
-        let instrumentMocks;
-        let active;
-        let additionalRighted;
-        let expired;
-        let uncategorized;
-
-        beforeEach(() => {
-            active = {
-                owner: ORE_TESTA_ACCOUNT_NAME,
-            };
-            expired = {
-                owner: ORE_TESTA_ACCOUNT_NAME,
-                end_time: Math.floor(Date.now() / 1000) - 10,
-            };
-            uncategorized = {
-                owner: ORE_TESTA_ACCOUNT_NAME,
-                instrument: {
-                    instrument_class: 'apimarket.uncategorized',
-                },
-            };
-            additionalRighted = {
-                owner: ORE_TESTA_ACCOUNT_NAME,
-                instrument: {
-                    instrument_class: 'apimarket.uncategorized',
-                    rights: [{
-                        right_name: 'apimarket.nobody.licenseApi',
-                    }],
-                },
-            };
-
-            instrumentMocks = mockInstruments([
-                active,
-                additionalRighted,
-                expired,
-                uncategorized,
-            ]);
-
-            fetch.resetMocks();
-            fetch.mockResponses(instrumentMocks);
-        });
-
-        it('returns all active instruments for account', async () => {
-            const instruments = await findInstruments(ORE_TESTA_ACCOUNT_NAME);
-            expectFetch(`${ORE_NETWORK_URI}/v1/chain/get_table_rows`);
-            expect(instruments).toEqual([JSON.parse(instrumentMocks[0]).rows[0], JSON.parse(instrumentMocks[0]).rows[1], JSON.parse(instrumentMocks[0]).rows[3]]);
-        });
-
-        it('returns all instruments', async () => {
-            const instruments = await findInstruments(ORE_TESTA_ACCOUNT_NAME, false);
-            expectFetch(`${ORE_NETWORK_URI}/v1/chain/get_table_rows`);
-            expect(instruments).toEqual([JSON.parse(instrumentMocks[0]).rows[0], JSON.parse(instrumentMocks[0]).rows[1], JSON.parse(instrumentMocks[0]).rows[2], JSON.parse(instrumentMocks[0]).rows[3]]);
-        });
-
-        it('filters by category', async () => {
-            const instruments = await findInstruments(ORE_TESTA_ACCOUNT_NAME, true, 'apimarket.uncategorized');
-            expectFetch(`${ORE_NETWORK_URI}/v1/chain/get_table_rows`);
-            expect(instruments).toEqual([JSON.parse(instrumentMocks[0]).rows[1], JSON.parse(instrumentMocks[0]).rows[3]]);
-        });
-
-        it('filters by right', async () => {
-            const instruments = await findInstruments(ORE_TESTA_ACCOUNT_NAME, true, 'apimarket.uncategorized', 'apimarket.nobody.licenseApi');
-            expectFetch(`${ORE_NETWORK_URI}/v1/chain/get_table_rows`);
-            expect(instruments).toEqual([JSON.parse(instrumentMocks[0]).rows[1]]);
-        });
-    });
-
-    describe('getRightFromInstrument', () => {
-        let instrument;
-        let rightName;
-        let rights;
-
-        beforeEach(() => {
-            rightName = 'apimarket.somebody.licenseApi';
-        });
-
-        describe('when multiple rights exist', async () => {
-            beforeEach(() => {
-                rights = [{
-                    right_name: 'apimarket.left.licenseApi',
-                }, {
-                    right_name: rightName,
-                }, {
-                    right_name: 'apimarket.right.licenseApi',
-                }];
-                instrument = mockInstrument({
-                    owner: ORE_TESTA_ACCOUNT_NAME,
-                    instrument: {
-                        instrument_class: 'apimarket.uncategorized',
-                        rights,
-                    },
-                });
-            });
-
-            it('returns the correct right', async () => {
-                const right = await getRight(instrument, rightName);
-                expect(right).toEqual(instrument.instrument.rights[1]);
-            });
-        });
-
-        describe('when the right does not exist', async () => {
-            beforeEach(() => {
-                rights = [{
-                    right_name: 'apimarket.left.licenseApi',
-                }, {
-                    right_name: 'apimarket.right.licenseApi',
-                }];
-                instrument = mockInstrument({
-                    owner: ORE_TESTA_ACCOUNT_NAME,
-                    instrument: {
-                        instrument_class: 'apimarket.uncategorized',
-                        rights,
-                    },
-                });
-            });
-
-            it('returns nothing', async () => {
-                const right = await getRight(instrument, rightName);
-                expect(right).toEqual(undefined);
-            });
-        });
-    });
-});
+describe('checkAdditionalUrlParams', () => {
+    beforeEach(async () => {
+        fetch.resetMocks();
+        mockGetTableRows(orejs, "tokens");
+    })
+    it('returns ', async () => {
+        const instrument = await getInstrument(1, INSTRUMENT_CONTRACT_NAME);
+        const parameterRules = await getParamRulesFromInstrument(instrument.instrument.parameter_rules);
+        expect(parameterRules.required).toEqual(['appId'])
+        expect(parameterRules.locked).toEqual(['userAccount'])
+        expect(parameterRules.defaultVal).toEqual([{
+            name: 'language',
+            value: 'en-us'
+        }])
+    })
+})
