@@ -1,16 +1,21 @@
+/* global VERIFIER_ACCOUNT_NAME=true */
+/* global ORE_TESTA_ACCOUNT_NAME=true */
+/* global CPU_CONTRACT_NAME=true */
+/* global CPU_TOKEN_SYMBOL=true */
+
 const {
     getBalance,
     getApprovalAmount
 } = require('../../src/token');
 
 const {
-    constructOrejs,
-    mockGetTransaction
-} = require('../helpers/ore')
+    orejs
+} = require('../../src/ore')
 
 const {
-    mock
-} = require('../helpers/fetch')
+    mockGetBalance,
+    mockGetTableRows
+} = require('../helpers/ore')
 
 
 describe('getBalance', () => {
@@ -18,34 +23,27 @@ describe('getBalance', () => {
 
     beforeEach(() => {
         cpuMockBalance = 30;
-
-        fetch.resetMocks();
-        fetch.mockResponses(mock([`${cpuMockBalance}.0000 ${CPU_TOKEN_SYMBOL}`]));
+        mockGetBalance(orejs, cpuMockBalance);
     });
 
     it('returns the CPU balance of the account', async () => {
         cpuBalance = await getBalance(ORE_TESTA_ACCOUNT_NAME, CPU_TOKEN_SYMBOL, CPU_CONTRACT_NAME);
         expect(cpuBalance).toEqual(cpuMockBalance);
     });
-
-    it('returns 0 if CPU balance of the account is 0', async () => {
-        const balance = await getBalance(INSTRUMENT_CONTRACT_NAME, CPU_TOKEN_SYMBOL, CPU_CONTRACT_NAME);
-        expect(balance).toEqual(0)
-    });
 });
 
 describe('getApprovalAmount', () => {
-    beforeAll(() => {
-        orejs = constructOrejs({
-            fetch
-        });
-    });
+    beforeEach(async () => {
+        fetch.resetMocks();
+    })
 
     it('returns approval amount for the verifier by the approving account', async () => {
+        mockGetTableRows(orejs, "allowances", "1.0000 CPU");
         const allowance = await getApprovalAmount(VERIFIER_ACCOUNT_NAME, ORE_TESTB_ACCOUNT_NAME, CPU_CONTRACT_NAME, CPU_TOKEN_SYMBOL);
         expect(allowance).toEqual(1);
     });
     it('returns 0 if no amount is approved by the approving account', async () => {
+        mockGetTableRows(orejs, "allowances");
         const allowance = await getApprovalAmount(VERIFIER_ACCOUNT_NAME, ORE_TESTA_ACCOUNT_NAME, CPU_CONTRACT_NAME, CPU_TOKEN_SYMBOL);
         expect(allowance).toEqual(0);
     });
