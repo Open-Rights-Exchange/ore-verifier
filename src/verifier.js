@@ -275,17 +275,7 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
               }
             }]
 
-            try {
-              (async () => {
-                const cpuTransactionReciept = await orejs.transact(actions)
-              })()
-            } catch (error) {
-              errMsg = "Error while transfering CPU from " + owner + " to " + issuer
-              if (error instanceof RpcError) {
-                throw new Error(errMsg + JSON.stringify(error.json, null, 2))
-              }
-              throw new Error(errMsg)
-            }
+            const cpuTransactionReciept = await orejs.transact(actions)
 
             log("transaction id for cpu transfer from " + owner + " to " + issuer + " ", cpuTransactionReciept.transaction_id)
           }
