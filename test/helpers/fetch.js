@@ -147,7 +147,29 @@ function mockInstrument(instrument = {}) {
       right_name: 'apimarket.manager.licenseApi',
       description: 'creates an api voucher to access cloud.hadron.contest-2018-07',
       price_in_cpu: '0',
-      additional_url_params: [],
+      additional_url_params: [{
+        "params": [{
+          "name": "appId",
+          "value": "2"
+        }, {
+          "name": "userAccount",
+          "value": "testAccount"
+        }, {
+          "name": "scope",
+          "value": "name,email"
+        }]
+      }, {
+        "params": [{
+          "name": "appId",
+          "value": "2"
+        }, {
+          "name": "userAccount",
+          "value": "Rob"
+        }, {
+          "name": "scope",
+          "value": "name,email"
+        }]
+      }]
     }],
     parent_instrument_id: 1,
     data: [],
@@ -287,6 +309,14 @@ function mockEndpointObject() {
   });
 }
 
+function mockAuthorization(_authorization = {}) {
+  return {
+    actor: expect.any(String),
+    permission: expect.any(String),
+    ..._authorization,
+  };
+}
+
 function mockApprovedAccounts(quantity = "0.0000 CPU") {
   return mock({
     "to": "verifier.ore",
@@ -305,6 +335,7 @@ function mockAccountFromKey(account = ORE_TESTA_ACCOUNT_NAME) {
 module.exports = {
   expectFetch,
   mock,
+  mockAuthorization,
   mockAccountFromKey,
   mockRight,
   mockAdditionalParams,

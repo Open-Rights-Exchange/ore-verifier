@@ -11,19 +11,13 @@ const {
 const {
     getInstrument,
     getRightFromInstrument,
-    getParamRulesFromInstrument
+    getParamRulesFromInstrument,
+    checkAdditionalUrlParams
 } = require('../../src/instrument')
 
 const {
     mockGetTableRows
 } = require('../helpers/ore')
-
-const {
-    expectFetch,
-    mock,
-    mockInstrument,
-    mockInstruments,
-} = require('../helpers/fetch');
 
 describe('getInstrument', () => {
     beforeEach(async () => {
@@ -57,12 +51,12 @@ describe('getRightFromInstrument', () => {
     })
 })
 
-describe('checkAdditionalUrlParams', () => {
+describe('getParamRulesFromInstrument', () => {
     beforeEach(async () => {
         fetch.resetMocks();
         mockGetTableRows(orejs, "tokens");
     })
-    it('returns ', async () => {
+    it('returns the parameter rules into json format', async () => {
         const instrument = await getInstrument(1, INSTRUMENT_CONTRACT_NAME);
         const parameterRules = await getParamRulesFromInstrument(instrument.instrument.parameter_rules);
         expect(parameterRules.required).toEqual(['appId'])
@@ -71,5 +65,40 @@ describe('checkAdditionalUrlParams', () => {
             name: 'language',
             value: 'en-us'
         }])
+    })
+})
+
+describe('checkAdditionalUrlParams', () => {
+    beforeEach(async () => {
+        fetch.resetMocks();
+        mockGetTableRows(orejs, "tokens");
+    })
+
+    it('returns true if the request parameters matches any of the additioanl url params records in the right', async () => {
+        const requestParams = {
+            imageurl: '92b2e84629673935f5377f58817d9120fc65731701d0a4f5505105eae72ebc77',
+            appId: 'd4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35',
+            userAccount: '273bb8988bc9eff3f945e81f4f9caee5d8e67d785b4078773e39ca84fc99f9b6',
+            scope: 'e59f9deedcc8f44cd3443857b2a4fd210f8bbba3d85308ff87194fb928bb81f4'
+        }
+        const instrument = await getInstrument(1, INSTRUMENT_CONTRACT_NAME);
+        const parameterRules = await getParamRulesFromInstrument(instrument.instrument.parameter_rules);
+        const validParams = await checkAdditionalUrlParams(parameterRules, requestParams, instrument.instrument.rights[0])
+        expect(validParams).toEqual(true)
+    })
+
+    it('returns error if the request parameters are missing the required values from the parameter rules', async () => {
+        const requestParams = {
+            imageurl: '92b2e84629673935f5377f58817d9120fc65731701d0a4f5505105eae72ebc77',
+            userAccount: '273bb8988bc9eff3f945e81f4f9caee5d8e67d785b4078773e39ca84fc99f9b6',
+            scope: 'e59f9deedcc8f44cd3443857b2a4fd210f8bbba3d85308ff87194fb928bb81f4'
+        }
+        const instrument = await getInstrument(1, INSTRUMENT_CONTRACT_NAME);
+        const parameterRules = await getParamRulesFromInstrument(instrument.instrument.parameter_rules);
+        try {
+            await checkAdditionalUrlParams(parameterRules, requestParams, instrument.instrument.rights[0])
+        } catch (e) {
+            expect(e.message).toMatch("required parameter appId not found in the request");
+        }
     })
 })

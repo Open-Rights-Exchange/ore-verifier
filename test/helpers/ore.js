@@ -4,19 +4,17 @@
 /* global ORE_TESTA_ACCOUNT_NAME: true */
 /* global :true */
 
-// const {
-//     Orejs
-// } = require('@open-rights-exchange/orejs');
-
 const {
     orejs
 } = require('../../src/ore')
 
 const {
     mockRight,
+    mockAuthorization,
     mockApprovedAccounts,
     mockAccountFromKey,
-    mockInstruments
+    mockInstruments,
+    mockTransaction
 } = require('../helpers/fetch')
 
 function constructOrejs(config) {
@@ -113,9 +111,42 @@ function mockGetAccountFromKey(_orejs = undefined, _account = ORE_TESTA_ACCOUNT_
     return getAccount;
 }
 
+function mockAction(_action = {}) {
+    return {
+        account: expect.any(String),
+        name: expect.any(String),
+        authorization: [mockAuthorization()],
+        data: expect.any(Object),
+        ..._action,
+    };
+}
+
+function mockGetTransaction(_orejs = undefined, _transaction = {}) {
+    const mockupTransaction = jest.fn();
+
+    const getTransaction = mockTransaction(_transaction);
+
+    mockupTransaction.mockReturnValue(getTransaction);
+    const orejs = _orejs || constructOrejs();
+    orejs.eos.transact = mockupTransaction;
+
+    return getTransaction;
+}
+
+function mockOptions(_options = {}) {
+    return {
+        blocksBehind: expect.any(Number),
+        expireSeconds: expect.any(Number),
+        ..._options,
+    };
+}
+
 module.exports = {
     constructOrejs,
+    mockAction,
     mockGetBalance,
     mockGetTableRows,
-    mockGetAccountFromKey
+    mockGetAccountFromKey,
+    mockGetTransaction,
+    mockOptions
 }
