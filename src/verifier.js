@@ -47,7 +47,7 @@ async function verify(signature, instrumentId, owner) {
 // update the usage log on the ore blockchain 
 async function updateUsageLog(verifier, logContractName, voucherId, rightName, accessToken, amount = 0, updateLogs = true) {
   let actions = []
-
+  let usageCountUpdateReciept
   const timestamp = Date.now()
   const accessTokenHash = ecc.sha256(accessToken)
 
@@ -96,18 +96,17 @@ async function updateUsageLog(verifier, logContractName, voucherId, rightName, a
 
   try {
     (async () => {
-      const usageCountUpdateReciept = await orejs.transact(actions)
+      usageCountUpdateReciept = await orejs.transact(actions)
     })()
   } catch (error) {
     errMsg = "Error while updating the usage count for" + rightName + "right of instrument id" + voucherId + "on the ORE blockchain."
+
     if (error instanceof RpcError) {
       throw new Error(errMsg + JSON.stringify(error.json, null, 2))
     }
     throw new Error(errMsg)
   }
-
-
-  log("transaction id for Api call count updates for voucher " + voucherId + " of " + owner + " ", usageCountUpdateReciept.transaction_id)
+  log("transaction id for Api call count updates for voucher " + voucherId + ": ", usageCountUpdateReciept)
 }
 
 // main handler for the verifier to verify an incoming set of client proofs
@@ -274,7 +273,9 @@ const verifyHandler = (verifier, privateKey, verifierPrivateKey, instrumentContr
                 memo
               }
             }]
+
             const cpuTransactionReciept = await orejs.transact(actions)
+
             log("transaction id for cpu transfer from " + owner + " to " + issuer + " ", cpuTransactionReciept.transaction_id)
           }
           updateUsageLog(verifier, logContractName, voucherId, rightName, JSON.stringify(jwtToken), amount)
@@ -342,5 +343,6 @@ module.exports = {
   checkVerifier,
   verify,
   verifyHandler,
-  usageHandler
+  usageHandler,
+  updateUsageLog
 }
