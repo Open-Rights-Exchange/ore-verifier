@@ -23,3 +23,6 @@ dispatch:
 
   - url: "explorer.openrights.exchange/*"
     service: explorer
+
+  - url: "staging.explorer.openrights.exchange/*"
+    service: staging-explorer
