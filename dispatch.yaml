@@ -24,6 +24,9 @@ dispatch:
   - url: "ore.network/*"
     service: orenetwork-web
 
+  - url: "www.ore.network/*"
+    service: orenetwork-web
+
   - url: "verifier-staging.openrights.exchange/*"
     service: verifier-staging
 
