@@ -15,6 +15,15 @@ dispatch:
   # - url: "www.openrights.exchange/*"
   #   service: web
 
+  # IMPORTANT - All projects in open-rights-exchange share the same dispatch.yaml
+  # ... the shared 'master' dispatch.yaml is in ore-verifier repo - update it there
+
+  - url: "staging.ore.network/*"
+    service: orenetwork-web-staging
+
+  - url: "ore.network/*"
+    service: orenetwork-web
+
   - url: "verifier-staging.openrights.exchange/*"
     service: verifier-staging
 
