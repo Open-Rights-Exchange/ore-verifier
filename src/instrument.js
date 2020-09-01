@@ -1,26 +1,26 @@
 /*
 includes all instrument related functions
 */
-const eosJs = require("./eos.js")
-const eos = eosJs.eos
+const {
+    orejs
+} = require("./ore.js")
 const {
     encrypt
 } = require("./helpers.js")
+
 async function getInstrument(instrumentId, instrumentContractName) {
     let instrument = null
-    const instruments = await eos.getTableRows({
+    const instruments = await orejs.getAllTableRows({
         code: instrumentContractName,
-        json: true,
         scope: instrumentContractName,
         table: 'tokens',
         limit: -1
     })
 
-    for (var i = 0; i < instruments.rows.length; i++) {
+    for (var i = 0; i < instruments.length; i++) {
 
-        if (instruments.rows[i]["id"] === instrumentId) {
-            instrument = instruments.rows[i]
-            return instrument
+        if (instruments[i]["id"] === instrumentId) {
+            return instruments[i]
         }
     }
     return instrument
@@ -30,6 +30,7 @@ async function getInstrument(instrumentId, instrumentContractName) {
 async function getRightFromInstrument(instrumentData, rightName) {
     let right = null
     const rights = instrumentData["instrument"]["rights"]
+
     for (var i = 0; i < rights.length; i++) {
         if (rights[i]["right_name"] === rightName) {
             right = rights[i]
@@ -43,7 +44,7 @@ async function getRightFromInstrument(instrumentData, rightName) {
 function getAdditionalUrlParams(right) {
     const additionalUrlParams = []
     let rightParams = right["additional_url_params"]
-    rightParams = JSON.parse(rightParams)
+
     rightParams.map(function (a) {
         const params = a.params
         const val = {}
@@ -91,7 +92,6 @@ function checkAdditionalUrlParams(instrumentParams, requestParams, right) {
                 return matches
             }
         })
-
         if (matches === additionalParamKeys.length) {
             locked.forEach(key => {
                 if (requestKeys.includes(key) && !additionalParamKeys.includes(key)) {
