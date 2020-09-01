@@ -44,7 +44,6 @@ async function getRightFromInstrument(instrumentData, rightName) {
 function getAdditionalUrlParams(right) {
     const additionalUrlParams = []
     let rightParams = right["additional_url_params"]
-    rightParams = JSON.parse(rightParams)
 
     rightParams.map(function (a) {
         const params = a.params
@@ -93,7 +92,6 @@ function checkAdditionalUrlParams(instrumentParams, requestParams, right) {
                 return matches
             }
         })
-
         if (matches === additionalParamKeys.length) {
             locked.forEach(key => {
                 if (requestKeys.includes(key) && !additionalParamKeys.includes(key)) {

@@ -35,3 +35,6 @@ dispatch:
 
   - url: "explorer.openrights.exchange/*"
     service: explorer
+
+  - url: "toolkit.openrights.exchange/*"
+    service: toolkit
