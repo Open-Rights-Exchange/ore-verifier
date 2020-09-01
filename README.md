@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Open-Rights-Exchange/ore-verifier.svg?style=svg)](https://circleci.com/gh/Open-Rights-Exchange/ore-verifier)
+<!-- [![CircleCI](https://circleci.com/gh/Open-Rights-Exchange/ore-verifier.svg?style=svg)](https://circleci.com/gh/Open-Rights-Exchange/ore-verifier) -->
 
 ## About
 
